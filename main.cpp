@@ -1,15 +1,14 @@
+#include "consistent_tree.hpp"
 #include <iostream>
-#include <list>
+#include <string>
 
-using std::list;
-
-template<class T>
-class consistent_list : public list<T> {
-
-};
+using std::string;
 
 int main() {
-    consistent_list<int> l;
-    l.assign({1,2,3,4,5});
+    // create a 2048 node tree with <int> as key and value types and <std::uint16_t> as size type in 'Fast' mode
+    avl_array<int, string> avl;
+    avl.insert(4, "four");
+    avl.insert(5, "five");
+    avl.insert(6, "six");
     return 0;
 }
