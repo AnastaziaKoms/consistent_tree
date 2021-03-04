@@ -1,14 +1,16 @@
 #include "consistent_tree.hpp"
 #include <iostream>
 #include <string>
+#define CATCH_CONFIG_MAIN
+#include "catch.hpp"
 
-using std::string;
+unsigned int Factorial( unsigned int number ) {
+    return number <= 1 ? number : Factorial(number-1)*number;
+}
 
-int main() {
-    // create a 2048 node tree with <int> as key and value types and <std::uint16_t> as size type in 'Fast' mode
-    avl_array<int, string> avl;
-    avl.insert(4, "four");
-    avl.insert(5, "five");
-    avl.insert(6, "six");
-    return 0;
+TEST_CASE( "Factorials are computed", "[factorial]" ) {
+    REQUIRE( Factorial(1) == 1 );
+    REQUIRE( Factorial(2) == 2 );
+    REQUIRE( Factorial(3) == 6 );
+    REQUIRE( Factorial(10) == 3628800 );
 }
