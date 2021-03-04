@@ -167,6 +167,7 @@ public:
      */
     bool insert(const key_type& key, const value_type& val) {
         _tree = _insert(_tree, key, val);
+        _size++;
         return true;
     }
 
