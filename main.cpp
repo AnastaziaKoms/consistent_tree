@@ -10,7 +10,12 @@ TEST_CASE("basic avl tests") {
     avl_array<int, string> tree;
     REQUIRE(tree.size() == 0);
     tree.insert(4, "four");
-    REQUIRE(tree.size() == 1);
+    tree.insert(5, "five");
+    tree.insert(6, "six");
+    auto it = tree.begin();
+    it++;
+
+    tree.erase(it);
 }
 TEST_CASE("consistent") {
 
