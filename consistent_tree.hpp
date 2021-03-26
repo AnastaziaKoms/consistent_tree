@@ -9,6 +9,9 @@
  * \param Size Container size
  * \param Fast If true every node stores an extra parent index. This increases memory but speed up insert/erase by factor 10
  */
+
+using smart_pointer::SmartPointer;
+
 template<typename Key, typename T>
 class avl_array
 {
@@ -33,7 +36,7 @@ class avl_array
     // iterator class
     typedef class tag_avl_array_iterator
     {
-        node*  _pNode;
+        node* _pNode;
         node* _root;
 
     public:
@@ -168,14 +171,11 @@ public:
         return iterator(findmin(_tree), _tree);
     }
 
-
     iterator end()
     {
-        return iterator(findmax(_tree), _tree);
+        return iterator(nullptr, _tree);
     }
 
-
-    // capacity
     size_type size() const {
         return _size;
     }
@@ -221,7 +221,10 @@ public:
      * \param key The key to find
      * \return Iterator if key was found, else end() is returned
      */
-    iterator find(const key_type& key);
+    iterator find(const key_type& key) {
+        if(!_tree) return end();
+        return iterator(_find(_tree,key), _tree);
+    }
 
     /**
      * Remove element by key
@@ -237,7 +240,8 @@ public:
      * \return True if the element was successfully removed, false if error
      */
     bool erase(iterator position) {
-        _remove(_tree, position.key());
+        _tree = _remove(_tree, position.key());
+        _size--;
         return true;
     }
 
@@ -309,6 +313,15 @@ private:
             return RRotation(n);
         }
         return n;
+    }
+
+    node* _find(node* n, const key_type& key) {
+        if(n->left != nullptr && n->key > key) return _find(n->left, key);
+        else if(n->right != nullptr && n-> key < key) return _find(n->right, key);
+        else {
+            if(n->key != key) return nullptr;
+            return n;
+        }
     }
 
     node* findmin(node* n)
