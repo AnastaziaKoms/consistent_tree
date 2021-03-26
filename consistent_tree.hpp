@@ -1,6 +1,6 @@
 #include <cstdint>
 #include <cstddef>
-
+#include "smart_ptr.hpp"
 
 /**
  * \param Key The key type. The type (class) must provide a 'less than' and 'equal to' operator
@@ -15,7 +15,6 @@ class avl_array
 
 
     typedef struct node {
-        size_t ref_count;
         bool deleted;
 
         Key key;
@@ -25,8 +24,9 @@ class avl_array
         node* left;
         node* right;
 
-        node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; ref_count = 0; deleted = false;}
+        node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; deleted = false;}
     } node;
+
     node* _tree;
     size_t _size;
 
@@ -104,7 +104,7 @@ class avl_array
             }
         }
         // postincrement
-        tag_avl_array_iterator operator++(int)
+        const tag_avl_array_iterator operator++(int)
         {
             tag_avl_array_iterator _copy = *this;
             ++(*this);
@@ -138,7 +138,7 @@ class avl_array
             }
         }
 
-        tag_avl_array_iterator operator--(int) {
+        const tag_avl_array_iterator operator--(int) {
             tag_avl_array_iterator _copy = *this;
             --(*this);
             return _copy;
@@ -222,17 +222,6 @@ public:
      * \return Iterator if key was found, else end() is returned
      */
     iterator find(const key_type& key);
-
-
-    /**
-     * Count elements with a specific key
-     * Searches the container for elements with a key equivalent to key and returns the number of matches.
-     * Because all elements are unique, the function can only return 1 (if the element is found) or zero (otherwise).
-     * \param key The key to find/count
-     * \return 0 if key was not found, 1 if key was found
-     */
-    size_type count(const key_type& key);
-
 
     /**
      * Remove element by key
