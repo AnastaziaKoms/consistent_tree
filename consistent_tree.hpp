@@ -23,25 +23,25 @@ class avl_array
         Key key;
         T value;
         int height;
-
-        node* left;
-        node* right;
+        using nodeptr = SmartPointer<node, std::allocator<node>>;
+        nodeptr left;
+        nodeptr right;
 
         node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; deleted = false;}
     } node;
-
-    node* _tree;
+    using nodeptr = SmartPointer<node, std::allocator<node>>;
+    nodeptr _tree;
     size_t _size;
 
     // iterator class
     typedef class tag_avl_array_iterator
     {
-        node* _pNode;
-        node* _root;
+        nodeptr _pNode;
+        nodeptr _root;
 
     public:
         // ctor
-        explicit tag_avl_array_iterator(node* instance = nullptr, node* tree = nullptr)
+        explicit tag_avl_array_iterator(nodeptr instance = nullptr, nodeptr tree = nullptr)
                 : _pNode(instance), _root(tree)
         { }
 
@@ -89,8 +89,8 @@ class avl_array
                     _pNode = _pNode->left;
                 return *this;
             } else {
-                node *q = _root;
-                node *suc = NULL;
+                nodeptr q = _root;
+                nodeptr suc = NULL;
 
                 while (q != NULL) {
                     if (q->key > _pNode->key) {
@@ -122,8 +122,8 @@ class avl_array
                 return *this;
             }
             else {
-                node* q = _root;
-                node* suc = NULL;
+                nodeptr q = _root;
+                nodeptr suc = NULL;
 
                 while (q != NULL) {
                     if (q->key < _pNode->key) {
@@ -173,7 +173,7 @@ public:
 
     iterator end()
     {
-        return iterator(nullptr, _tree);
+        return iterator(nodeptr(nullptr), _tree);
     }
 
     size_type size() const {
@@ -248,43 +248,43 @@ public:
     /////////////////////////////////////////////////////////////////////////////
     // Helper functions
 private:
-    int height(node* n)
+    int height(nodeptr n)
     {
         return n ? n->height : 0;
     }
 
-    int balancefactor(node* n)
+    int balancefactor(nodeptr n)
     {
         return height(n->right) - height(n->left);
     }
 
-    void fixheight(node* n)
+    void fixheight(nodeptr n)
     {
         n->height = (height(n->left) > height(n->right) ?
                      height(n->left) : height(n->right))+1;
     }
 
-    node* RRotation(node* n)
+    nodeptr RRotation(nodeptr n)
     {
-        node* tmp = n->left;
+        nodeptr tmp = n->left;
         n->left = tmp->right;
         tmp->right = n;
         fixheight(n);fixheight(tmp);
         return tmp;
     }
 
-    node* LRotation(node* n)
+    nodeptr LRotation(nodeptr n)
     {
-        node* tmp = n->right;
+        nodeptr tmp = n->right;
         n->right = tmp->left;
         tmp->left = n;
         fixheight(n);fixheight(tmp);
         return tmp;
     }
 
-    node* _insert(node* n, Key k, T val)
+    nodeptr _insert(nodeptr n, Key k, T val)
     {
-        if(!n) n = new node(k, val);
+        if(!n) n = nodeptr(new node(k, val));
         if(k < n->key)
             n->left = _insert(n->left, k, val);
         else if(k > n->key)
@@ -297,7 +297,7 @@ private:
         return balance(n);
     }
 
-    node* balance(node* n)
+    nodeptr balance(nodeptr n)
     {
         fixheight(n);
         if(balancefactor(n) == 2)
@@ -315,26 +315,28 @@ private:
         return n;
     }
 
-    node* _find(node* n, const key_type& key) {
-        if(n->left != nullptr && n->key > key) return _find(n->left, key);
-        else if(n->right != nullptr && n-> key < key) return _find(n->right, key);
+    nodeptr _find(nodeptr n, const key_type& key) {
+        if(n->left && n->key > key)
+            return _find(n->left, key);
+        else if(n->right && n->key < key)
+            return _find(n->right, key);
         else {
-            if(n->key != key) return nullptr;
+            if(n->key != key) return nodeptr(nullptr);
             return n;
         }
     }
 
-    node* findmin(node* n)
+    nodeptr findmin(nodeptr n)
     {
         return n->left ? findmin(n->left) : n;
     }
 
-    node* findmax(node* n)
+    nodeptr findmax(nodeptr n)
     {
         return n->right ? findmax(n->right) : n;
     }
 
-    node* removemin(node* n)
+    nodeptr removemin(nodeptr n)
     {
         if(n->left == 0)
             return n->right;
@@ -342,24 +344,29 @@ private:
         return balance(n);
     }
 
-    node* _remove(node* n, Key k)
+    nodeptr _remove(nodeptr n, Key k)
     {
-        if(!n) return 0;
+        if(!n) return nodeptr(nullptr);
         if(k < n->key)
             n->left = _remove(n->left, k);
         else if(k > n->key)
             n->right = _remove(n->right,k);
         else
         {
-            node* tmpl = n->left;
-            node* tmpr = n->right;
-            delete n;
-            if(!tmpr) return tmpl;
-            node* min = findmin(tmpr);
-            min->right = removemin(tmpr);
-            min->left = tmpl;
-            return balance(min);
+            if(n.count_owners() > 1) n->deleted = true;
+            else return true_remove(n);
         }
         return balance(n);
+
+    }
+    nodeptr true_remove(nodeptr n) {
+        nodeptr tmpl = n->left;
+        nodeptr tmpr = n->right;
+        //delete n;
+        if(!tmpr) return tmpl;
+        nodeptr min = findmin(tmpr);
+        min->right = removemin(tmpr);
+        min->left = tmpl;
+        return balance(min);
     }
 };

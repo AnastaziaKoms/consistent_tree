@@ -9,8 +9,8 @@ namespace smart_pointer {
 
 // `SmartPointer` class declaration
     template<
-            typename T
-            //,typename Allocator
+            typename T,
+            typename Allocator
     >
     class SmartPointer {
 
@@ -143,6 +143,7 @@ namespace smart_pointer {
                     static_cast<void*>(rhs.get()));
         }
 
+
         // if pointers points to the same address or both null => false
         template<typename U, typename AnotherAllocator>
         bool operator!=(const SmartPointer<U, AnotherAllocator>& rhs) const {
@@ -166,7 +167,7 @@ namespace smart_pointer {
             }
 
             T* ptr;
-            //Allocator alloc;
+            Allocator alloc;
             size_t count = 0;
         };
         Core* core;

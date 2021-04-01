@@ -18,6 +18,8 @@ TEST_CASE("basic avl tests") {
     it = tree.find(20);
     REQUIRE(it.val() == 20);
 
+    tree.erase(it);
+    int a = 0;
 }
 TEST_CASE("consistent") {
 
