@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <cstddef>
 #include "smart_ptr.hpp"
+#include <iostream>
 
 /**
  * \param Key The key type. The type (class) must provide a 'less than' and 'equal to' operator
@@ -28,6 +29,10 @@ class avl_array
         nodeptr right;
 
         node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; deleted = false;}
+
+        ~node() {
+            std::cout << "node " << value << " deleted" << std::endl;
+        }
     } node;
     using nodeptr = SmartPointer<node, std::allocator<node>>;
     nodeptr _tree;
@@ -353,20 +358,15 @@ private:
             n->right = _remove(n->right,k);
         else
         {
-            if(n.count_owners() > 1) n->deleted = true;
-            else return true_remove(n);
+            nodeptr tmpl = n->left;
+            nodeptr tmpr = n->right;
+            n->deleted = true;
+            if(!tmpr) return tmpl;
+            nodeptr min = findmin(tmpr);
+            min->right = removemin(tmpr);
+            min->left = tmpl;
+            return balance(min);
         }
         return balance(n);
-
-    }
-    nodeptr true_remove(nodeptr n) {
-        nodeptr tmpl = n->left;
-        nodeptr tmpr = n->right;
-        //delete n;
-        if(!tmpr) return tmpl;
-        nodeptr min = findmin(tmpr);
-        min->right = removemin(tmpr);
-        min->left = tmpl;
-        return balance(min);
     }
 };

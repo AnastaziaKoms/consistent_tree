@@ -49,7 +49,8 @@ namespace smart_pointer {
                 if (core->ptr != nullptr) {
                     core->count--;
                     if (core->count == 0) {
-                        core->alloc.deallocate(core->ptr, 1);
+                        //core->alloc.deallocate(core->ptr, 1);
+                        delete core->ptr;
                         core->ptr = nullptr;
                         delete core;
                         core = nullptr;
@@ -85,7 +86,8 @@ namespace smart_pointer {
             if (core != nullptr) {
                 core->count--;
                 if (core->count == 0) {
-                    core->alloc.deallocate(core->ptr, 1);
+                    //core->alloc.deallocate(core->ptr, 1);
+                    delete core->ptr;
                     core->ptr = nullptr;
                     delete core;
                     core = nullptr;
@@ -167,7 +169,7 @@ namespace smart_pointer {
             }
 
             T* ptr;
-            Allocator alloc;
+            //Allocator alloc;
             size_t count = 0;
         };
         Core* core;
