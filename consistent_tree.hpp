@@ -86,18 +86,17 @@ class avl_array
 
         // preincrement
         tag_avl_array_iterator& operator++() {
-
-
-            if (_pNode->right != NULL) {
+            if(!_pNode) return *this;
+            if (_pNode->right) {
                 _pNode = _pNode->right;
-                while (_pNode->left != NULL)
+                while (_pNode->left)
                     _pNode = _pNode->left;
                 return *this;
             } else {
                 nodeptr q = _root;
-                nodeptr suc = NULL;
+                nodeptr suc;
 
-                while (q != NULL) {
+                while (q) {
                     if (q->key > _pNode->key) {
                         suc = q;
                         q = q->left;
@@ -120,17 +119,18 @@ class avl_array
         }
 
         tag_avl_array_iterator operator--() {
-            if (_pNode->left != NULL) {
+            if(!_pNode) return *this;
+            if (_pNode->left) {
                 _pNode = _pNode->left;
-                while (_pNode->right != NULL)
+                while (_pNode->right)
                     _pNode = _pNode->right;
                 return *this;
             }
             else {
                 nodeptr q = _root;
-                nodeptr suc = NULL;
+                nodeptr suc;
 
-                while (q != NULL) {
+                while (q) {
                     if (q->key < _pNode->key) {
                         suc = q;
                         q = q->right;
@@ -360,7 +360,9 @@ private:
         {
             nodeptr tmpl = n->left;
             nodeptr tmpr = n->right;
+
             n->deleted = true;
+
             if(!tmpr) return tmpl;
             nodeptr min = findmin(tmpr);
             min->right = removemin(tmpr);
