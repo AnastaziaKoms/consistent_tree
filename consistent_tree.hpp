@@ -87,13 +87,13 @@ class avl_array
         // preincrement
         tag_avl_array_iterator& operator++() {
             if(!_pNode) return *this;
-            if (_pNode->right) {
+            if (_pNode->right && !_pNode->right->deleted) {
                 _pNode = _pNode->right;
                 while (_pNode->left)
                     _pNode = _pNode->left;
                 return *this;
             } else {
-                nodeptr q = _root;
+                nodeptr q = _root->left; // get start node
                 nodeptr suc;
 
                 while (q) {
@@ -107,7 +107,6 @@ class avl_array
                 }
                 _pNode = suc;
                 return *this;
-
             }
         }
         // postincrement
@@ -120,14 +119,14 @@ class avl_array
 
         tag_avl_array_iterator operator--() {
             if(!_pNode) return *this;
-            if (_pNode->left) {
+            if (_pNode->left && !_pNode->left->deleted) {
                 _pNode = _pNode->left;
                 while (_pNode->right)
                     _pNode = _pNode->right;
                 return *this;
             }
             else {
-                nodeptr q = _root;
+                nodeptr q = _root->left; // get start node
                 nodeptr suc;
 
                 while (q) {
@@ -165,7 +164,7 @@ public:
     typedef avl_array_iterator  iterator;
     typedef size_t                size_type;
 
-    avl_array(): _tree(NULL), _size(0) {
+    avl_array(): _tree(new node(Key(), T())), _size(0) {
 
     }
 
@@ -173,12 +172,12 @@ public:
     // iterators
     iterator begin()
     {
-        return iterator(findmin(_tree), _tree);
+        return iterator(findmin(_tree->left), _tree);
     }
 
     iterator end()
     {
-        return iterator(nodeptr(nullptr), _tree);
+        return iterator(nodeptr(nullptr), _tree->left);
     }
 
     size_type size() const {
@@ -206,7 +205,7 @@ public:
      * \return True if the key was successfully inserted or updated, false if container is full
      */
     bool insert(const key_type& key, const value_type& val) {
-        _tree = _insert(_tree, key, val);
+        _tree->left = _insert(_tree->left, key, val);
         _size++;
         return true;
     }
@@ -227,8 +226,8 @@ public:
      * \return Iterator if key was found, else end() is returned
      */
     iterator find(const key_type& key) {
-        if(!_tree) return end();
-        return iterator(_find(_tree,key), _tree);
+        if(!_tree->left) return end();
+        return iterator(_find(_tree->left,key), _tree);
     }
 
     /**
@@ -245,7 +244,7 @@ public:
      * \return True if the element was successfully removed, false if error
      */
     bool erase(iterator position) {
-        _tree = _remove(_tree, position.key());
+        _tree->left = _remove(_tree->left, position.key());
         _size--;
         return true;
     }
