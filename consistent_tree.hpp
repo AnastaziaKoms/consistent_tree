@@ -31,7 +31,7 @@ class avl_array
         node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; deleted = false;}
 
         ~node() {
-            std::cout << "node " << value << " deleted" << std::endl;
+            //std::cout << "node " << value << " deleted" << std::endl;
         }
     } node;
     using nodeptr = SmartPointer<node, std::allocator<node>>;
@@ -63,7 +63,7 @@ class avl_array
 
         bool operator!=(const tag_avl_array_iterator& rhs) const
         {
-            return *this != rhs;
+            return _pNode != _pNode;
         }
 
         // dereference - access value
@@ -87,7 +87,7 @@ class avl_array
         // preincrement
         tag_avl_array_iterator& operator++() {
             if(!_pNode) return *this;
-            if (_pNode->right && !_pNode->right->deleted) {
+            if (!_pNode->deleted && _pNode->right) {
                 _pNode = _pNode->right;
                 while (_pNode->left)
                     _pNode = _pNode->left;
@@ -119,7 +119,7 @@ class avl_array
 
         tag_avl_array_iterator operator--() {
             if(!_pNode) return *this;
-            if (_pNode->left && !_pNode->left->deleted) {
+            if (!_pNode->deleted && _pNode->left) {
                 _pNode = _pNode->left;
                 while (_pNode->right)
                     _pNode = _pNode->right;
@@ -168,7 +168,6 @@ public:
 
     }
 
-
     // iterators
     iterator begin()
     {
@@ -190,13 +189,22 @@ public:
     /**
      * Clear the container
      */
-    void clear();
-    /*
-    {
-        size_ = 0U;
-        root_ = INVALID_IDX;
-    }*/
+    void clear() {
+        _size = 0U;
+        _tree->left = NULL;
+    }
 
+    T& operator[](const key_type& k)
+    {
+        auto res = insert(k, T());
+        return res.val();
+    }
+
+    T& operator[](key_type&& k)
+    {
+        auto res = insert(std::move(k), T());
+        return res.val();
+    }
 
     /**
      * Insert or update an element
@@ -204,10 +212,10 @@ public:
      * \param val Value to insert or update
      * \return True if the key was successfully inserted or updated, false if container is full
      */
-    bool insert(const key_type& key, const value_type& val) {
+    iterator insert(const key_type& key, const value_type& val) {
         _tree->left = _insert(_tree->left, key, val);
         _size++;
-        return true;
+        return iterator(_find(_tree->left,key), _tree);
     }
 
 
@@ -217,6 +225,7 @@ public:
      * \param val If key is found, the value of the element is set
      * \return True if key was found
      */
+
     bool find(const key_type& key, value_type& val) const;
 
 
@@ -235,7 +244,11 @@ public:
      * \param key The key of the element to remove
      * \return True if the element ws removed, false if key was not found
      */
-    bool erase(const key_type& key);
+    bool erase(const key_type& key) {
+        _tree->left = _remove(_tree->left, key);
+        _size--;
+        return true;
+    }
 
     /**
      * Remove element by iterator position
