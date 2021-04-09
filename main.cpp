@@ -6,12 +6,12 @@
 using std::string;
 
 TEST_CASE("basic avl tests") {
-    avl_array<char, string> tree;
+    avl_tree<char, string> tree;
     tree.insert('0', "abc");
     tree.insert('1', "zxc");
     tree.insert('2', "klj");
 
-    avl_array<char, string> copy(tree);
+    avl_tree<char, string> copy(tree);
 
     REQUIRE(copy['0'] == "abc");
     REQUIRE(tree.size() == copy.size());
@@ -32,7 +32,7 @@ TEST_CASE("basic avl tests") {
 
 TEST_CASE("Consistency")
 {
-    auto tree = avl_array<int, int>();
+    auto tree = avl_tree<int, int>();
     tree.insert(1, 2);
     tree.insert(3, 4);
     tree.insert(5, 6);
@@ -55,7 +55,7 @@ TEST_CASE("Consistency")
 TEST_CASE("Consistency_correct_end")
 {
     int n = 5000;
-    auto tree = avl_array<int, int>();
+    auto tree = avl_tree<int, int>();
     for (int i = 0; i < n; ++i)
     {
         auto key = std::rand() % 5000;
@@ -63,7 +63,7 @@ TEST_CASE("Consistency_correct_end")
         tree.insert(key, value);
     }
 
-    auto its = std::vector<avl_array<int, int>::iterator>();
+    auto its = std::vector<avl_tree<int, int>::iterator>();
     for (int i = 0; i < n; ++i)
     {
         auto it = tree.begin();

@@ -14,7 +14,7 @@
 using smart_pointer::SmartPointer;
 
 template<typename Key, typename T>
-class avl_array
+class avl_tree
 {
 
 
@@ -39,29 +39,29 @@ class avl_array
     size_t _size;
 
     // iterator class
-    typedef class tag_avl_array_iterator
+    typedef class tag_avl_tree_iterator
     {
         nodeptr _pNode;
         nodeptr _root;
 
     public:
         // ctor
-        explicit tag_avl_array_iterator(nodeptr instance = nullptr, nodeptr tree = nullptr)
+        explicit tag_avl_tree_iterator(nodeptr instance = nullptr, nodeptr tree = nullptr)
                 : _pNode(instance), _root(tree)
         { }
 
-        tag_avl_array_iterator& operator=(const tag_avl_array_iterator& other)
+        tag_avl_tree_iterator& operator=(const tag_avl_tree_iterator& other)
         {
             _pNode = other._pNode;
             return *this;
         }
 
-        bool operator==(const tag_avl_array_iterator& rhs) const
+        bool operator==(const tag_avl_tree_iterator& rhs) const
         {
             return _pNode == rhs._pNode;
         }
 
-        bool operator!=(const tag_avl_array_iterator& rhs) const
+        bool operator!=(const tag_avl_tree_iterator& rhs) const
         {
             return _pNode != rhs._pNode;
         }
@@ -85,7 +85,7 @@ class avl_array
         }
 
         // preincrement
-        tag_avl_array_iterator& operator++() {
+        tag_avl_tree_iterator& operator++() {
             if(!_pNode) return *this;
             if (!_pNode->deleted && _pNode->right) {
                 _pNode = _pNode->right;
@@ -110,14 +110,14 @@ class avl_array
             }
         }
         // postincrement
-        const tag_avl_array_iterator operator++(int)
+        const tag_avl_tree_iterator operator++(int)
         {
-            tag_avl_array_iterator _copy = *this;
+            tag_avl_tree_iterator _copy = *this;
             ++(*this);
             return _copy;
         }
 
-        tag_avl_array_iterator operator--() {
+        tag_avl_tree_iterator operator--() {
             if(!_pNode) return *this;
             if (!_pNode->deleted && _pNode->left) {
                 _pNode = _pNode->left;
@@ -145,14 +145,14 @@ class avl_array
             }
         }
 
-        const tag_avl_array_iterator operator--(int) {
-            tag_avl_array_iterator _copy = *this;
+        const tag_avl_tree_iterator operator--(int) {
+            tag_avl_tree_iterator _copy = *this;
             --(*this);
             return _copy;
         }
-    } avl_array_iterator;
+    } avl_tree_iterator;
 
-    friend tag_avl_array_iterator;
+    friend tag_avl_tree_iterator;
 public:
 
     typedef T                   value_type;
@@ -161,13 +161,13 @@ public:
     typedef T&                  reference;
     typedef const T&            const_reference;
     typedef Key                 key_type;
-    typedef avl_array_iterator  iterator;
+    typedef avl_tree_iterator  iterator;
     typedef size_t                size_type;
 
-    avl_array(): _tree(new node(Key(), T())), _size(0) {
+    avl_tree(): _tree(new node(Key(), T())), _size(0) {
 
     }
-    avl_array(avl_array& tree): avl_array() {
+    avl_tree(avl_tree& tree): avl_tree() {
         auto it = tree.begin();
         auto end = tree.end();
         while (it != end) {
