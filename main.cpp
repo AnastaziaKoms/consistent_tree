@@ -6,11 +6,31 @@
 using std::string;
 
 TEST_CASE("basic avl tests") {
+    avl_array<char, string> tree;
+    tree.insert('0', "abc");
+    tree.insert('1', "zxc");
+    tree.insert('2', "klj");
+
+    avl_array<char, string> copy(tree);
+
+    REQUIRE(copy['0'] == "abc");
+    REQUIRE(tree.size() == copy.size());
+
+    REQUIRE(tree.find('2').val() == "klj");
+    REQUIRE(tree.size() == 3);
+
+    tree.clear();
+    REQUIRE(tree.find('0') == tree.end());
+    REQUIRE(tree.find('1') == tree.end());
+    REQUIRE(tree.find('2') == tree.end());
+    REQUIRE(tree.size() == 0);
+    REQUIRE(tree.empty());
 
 
+    REQUIRE(tree.begin() == tree.end());
 }
 
-TEST_CASE("Consistency", "First")
+TEST_CASE("Consistency")
 {
     auto tree = avl_array<int, int>();
     tree.insert(1, 2);
@@ -32,7 +52,7 @@ TEST_CASE("Consistency", "First")
     REQUIRE(it.val() == 6);
 }
 
-TEST_CASE("Consistency_2", "Second")
+TEST_CASE("Consistency_correct_end")
 {
     int n = 5000;
     auto tree = avl_array<int, int>();

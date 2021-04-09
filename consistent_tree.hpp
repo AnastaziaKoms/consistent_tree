@@ -24,7 +24,7 @@ class avl_array
         Key key;
         T value;
         int height;
-        using nodeptr = SmartPointer<node, std::allocator<node>>;
+        using nodeptr = SmartPointer<node>;
         nodeptr left;
         nodeptr right;
 
@@ -34,7 +34,7 @@ class avl_array
             //std::cout << "node " << value << " deleted" << std::endl;
         }
     } node;
-    using nodeptr = SmartPointer<node, std::allocator<node>>;
+    using nodeptr = SmartPointer<node>;
     nodeptr _tree;
     size_t _size;
 
@@ -58,12 +58,12 @@ class avl_array
 
         bool operator==(const tag_avl_array_iterator& rhs) const
         {
-            return _pNode == _pNode;
+            return _pNode == rhs._pNode;
         }
 
         bool operator!=(const tag_avl_array_iterator& rhs) const
         {
-            return _pNode != _pNode;
+            return _pNode != rhs._pNode;
         }
 
         // dereference - access value
@@ -167,7 +167,14 @@ public:
     avl_array(): _tree(new node(Key(), T())), _size(0) {
 
     }
-
+    avl_array(avl_array& tree): avl_array() {
+        auto it = tree.begin();
+        auto end = tree.end();
+        while (it != end) {
+            insert(it.key(), it.val());
+            it++;
+        }
+    }
     // iterators
     iterator begin()
     {
@@ -196,13 +203,13 @@ public:
 
     T& operator[](const key_type& k)
     {
-        auto res = insert(k, T());
+        auto res = find(k);
         return res.val();
     }
 
     T& operator[](key_type&& k)
     {
-        auto res = insert(std::move(k), T());
+        auto res = find(std::move(k));
         return res.val();
     }
 
@@ -344,8 +351,9 @@ private:
     }
 
     nodeptr findmin(nodeptr n)
-    {
-        return n->left ? findmin(n->left) : n;
+    {   if(n)
+            return n->left ? findmin(n->left) : n;
+        return nodeptr(nullptr);
     }
 
     nodeptr findmax(nodeptr n)

@@ -9,8 +9,7 @@ namespace smart_pointer {
 
 // `SmartPointer` class declaration
     template<
-            typename T,
-            typename Allocator
+            typename T
     >
     class SmartPointer {
 
@@ -133,9 +132,8 @@ namespace smart_pointer {
         }
 
         // if pointers points to the same address or both null => true
-        template<typename U, typename AnotherAllocator>
-        bool operator==(const SmartPointer<U,
-                AnotherAllocator>& rhs) const {
+        template<typename U>
+        bool operator==(const SmartPointer<U>& rhs) const {
             if (!core && !rhs.get())
                 return true;
             if (((core == nullptr) && (rhs.get() != nullptr)) ||
@@ -147,8 +145,8 @@ namespace smart_pointer {
 
 
         // if pointers points to the same address or both null => false
-        template<typename U, typename AnotherAllocator>
-        bool operator!=(const SmartPointer<U, AnotherAllocator>& rhs) const {
+        template<typename U>
+        bool operator!=(const SmartPointer<U>& rhs) const {
             return !(*this == rhs);
         }
 
