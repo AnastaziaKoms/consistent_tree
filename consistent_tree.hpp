@@ -16,8 +16,6 @@ using smart_pointer::SmartPointer;
 template<typename Key, typename T>
 class avl_tree
 {
-
-
     typedef struct node {
         bool deleted;
 
@@ -29,11 +27,8 @@ class avl_tree
         nodeptr right;
 
         node(Key k, T val){key = k; value = val; left = right = NULL; height = 1; deleted = false;}
-
-        ~node() {
-            //std::cout << "node " << value << " deleted" << std::endl;
-        }
     } node;
+    
     using nodeptr = SmartPointer<node>;
     nodeptr _tree;
     size_t _size;
@@ -50,37 +45,31 @@ class avl_tree
                 : _pNode(instance), _root(tree)
         { }
 
-        tag_avl_tree_iterator& operator=(const tag_avl_tree_iterator& other)
-        {
+        tag_avl_tree_iterator& operator=(const tag_avl_tree_iterator& other) {
             _pNode = other._pNode;
             return *this;
         }
 
-        bool operator==(const tag_avl_tree_iterator& rhs) const
-        {
+        bool operator==(const tag_avl_tree_iterator& rhs) const {
             return _pNode == rhs._pNode;
         }
 
-        bool operator!=(const tag_avl_tree_iterator& rhs) const
-        {
+        bool operator!=(const tag_avl_tree_iterator& rhs) const {
             return _pNode != rhs._pNode;
         }
 
         // dereference - access value
-        T& operator*() const
-        {
+        T& operator*() const {
             return val();
         }
 
         // access value
-        T& val() const
-        {
+        T& val() const {
             return _pNode->value;
         }
 
         // access key
-        Key& key() const
-        {
+        Key& key() const {
             return _pNode->key;
         }
 
@@ -110,8 +99,7 @@ class avl_tree
             }
         }
         // postincrement
-        const tag_avl_tree_iterator operator++(int)
-        {
+        const tag_avl_tree_iterator operator++(int) {
             tag_avl_tree_iterator _copy = *this;
             ++(*this);
             return _copy;
@@ -156,13 +144,9 @@ class avl_tree
 public:
 
     typedef T                   value_type;
-    typedef T*                  pointer;
-    typedef const T*            const_pointer;
-    typedef T&                  reference;
-    typedef const T&            const_reference;
     typedef Key                 key_type;
-    typedef avl_tree_iterator  iterator;
-    typedef size_t                size_type;
+    typedef avl_tree_iterator   iterator;
+    typedef size_t              size_type;
 
     avl_tree(): _tree(new node(Key(), T())), _size(0) {
 
@@ -178,7 +162,7 @@ public:
     // iterators
     iterator begin()
     {
-        return iterator(findmin(_tree->left), _tree);
+        return iterator(_findmin(_tree->left), _tree);
     }
 
     iterator end()
@@ -193,121 +177,77 @@ public:
     bool empty() const {
         return _size == static_cast<size_type>(0);
     }
-    /**
-     * Clear the container
-     */
+    
     void clear() {
         _size = 0U;
         _tree->left = NULL;
     }
 
-    T& operator[](const key_type& k)
-    {
+    T& operator[](const key_type& k) {
         auto res = find(k);
         return res.val();
     }
 
-    T& operator[](key_type&& k)
-    {
+    T& operator[](key_type&& k) {
         auto res = find(std::move(k));
         return res.val();
     }
-
-    /**
-     * Insert or update an element
-     * \param key The key to insert. If the key already exists, it is updated
-     * \param val Value to insert or update
-     * \return True if the key was successfully inserted or updated, false if container is full
-     */
+    
     iterator insert(const key_type& key, const value_type& val) {
         _tree->left = _insert(_tree->left, key, val);
         _size++;
         return iterator(_find(_tree->left,key), _tree);
     }
-
-
-    /**
-     * Find an element
-     * \param key The key to find
-     * \param val If key is found, the value of the element is set
-     * \return True if key was found
-     */
-
-    bool find(const key_type& key, value_type& val) const;
-
-
-    /**
-     * Find an element and return an iterator as result
-     * \param key The key to find
-     * \return Iterator if key was found, else end() is returned
-     */
+    
     iterator find(const key_type& key) {
         if(!_tree->left) return end();
         return iterator(_find(_tree->left,key), _tree);
     }
-
-    /**
-     * Remove element by key
-     * \param key The key of the element to remove
-     * \return True if the element ws removed, false if key was not found
-     */
+    
     bool erase(const key_type& key) {
         _tree->left = _remove(_tree->left, key);
         _size--;
         return true;
     }
-
-    /**
-     * Remove element by iterator position
-     * THIS ERASE OPERATION INVALIDATES ALL ITERATORS!
-     * \param position The iterator position of the element to remove
-     * \return True if the element was successfully removed, false if error
-     */
+    
     bool erase(iterator position) {
         _tree->left = _remove(_tree->left, position.key());
         _size--;
         return true;
     }
-
-    /////////////////////////////////////////////////////////////////////////////
+    
     // Helper functions
 private:
-    int height(nodeptr n)
-    {
+    int _height(nodeptr n) {
         return n ? n->height : 0;
     }
 
-    int balancefactor(nodeptr n)
-    {
-        return height(n->right) - height(n->left);
+    int _balancefactor(nodeptr n) {
+        return _height(n->right) - _height(n->left);
     }
 
-    void fixheight(nodeptr n)
-    {
-        n->height = (height(n->left) > height(n->right) ?
-                     height(n->left) : height(n->right))+1;
+    void _fixheight(nodeptr n) {
+        n->height = (_height(n->left) > _height(n->right) ?
+                     _height(n->left) : _height(n->right))+1;
     }
-
-    nodeptr RRotation(nodeptr n)
-    {
+    
+    nodeptr _RRotation(nodeptr n) {
         nodeptr tmp = n->left;
         n->left = tmp->right;
         tmp->right = n;
-        fixheight(n);fixheight(tmp);
+        _fixheight(n);_fixheight(tmp);
         return tmp;
     }
 
-    nodeptr LRotation(nodeptr n)
-    {
+    nodeptr _LRotation(nodeptr n) {
         nodeptr tmp = n->right;
         n->right = tmp->left;
         tmp->left = n;
-        fixheight(n);fixheight(tmp);
+        _fixheight(n);_fixheight(tmp);
         return tmp;
     }
 
-    nodeptr _insert(nodeptr n, Key k, T val)
-    {
+    nodeptr _insert(nodeptr n, Key k, T val) {
         if(!n) n = nodeptr(new node(k, val));
         if(k < n->key)
             n->left = _insert(n->left, k, val);
@@ -318,23 +258,22 @@ private:
             return n;
         }
 
-        return balance(n);
+        return _balance(n);
     }
-
-    nodeptr balance(nodeptr n)
-    {
-        fixheight(n);
-        if(balancefactor(n) == 2)
+    
+    nodeptr _balance(nodeptr n) {
+        _fixheight(n);
+        if(_balancefactor(n) == 2)
         {
-            if(balancefactor(n->right) < 0)
-                n->right = RRotation(n->right);
-            return LRotation(n);
+            if(_balancefactor(n->right) < 0)
+                n->right = _RRotation(n->right);
+            return _LRotation(n);
         }
-        if (balancefactor(n) == -2)
+        if (_balancefactor(n) == -2)
         {
-            if(balancefactor(n->left) > 0)
-                n->left = LRotation(n->left);
-            return RRotation(n);
+            if(_balancefactor(n->left) > 0)
+                n->left = _LRotation(n->left);
+            return _RRotation(n);
         }
         return n;
     }
@@ -350,27 +289,26 @@ private:
         }
     }
 
-    nodeptr findmin(nodeptr n)
-    {   if(n)
-            return n->left ? findmin(n->left) : n;
+    nodeptr _findmin(nodeptr n) {   
+        if(n)
+            return n->left ? _findmin(n->left) : n;
         return nodeptr(nullptr);
     }
 
-    nodeptr findmax(nodeptr n)
-    {
-        return n->right ? findmax(n->right) : n;
+    nodeptr _findmax(nodeptr n) {
+        if(n)
+            return n->right ? _findmax(n->right) : n;
+        return nodeptr(nullptr);
     }
 
-    nodeptr removemin(nodeptr n)
-    {
+    nodeptr _removemin(nodeptr n) {
         if(n->left == 0)
             return n->right;
-        n->left = removemin(n->left);
-        return balance(n);
+        n->left = _removemin(n->left);
+        return _balance(n);
     }
 
-    nodeptr _remove(nodeptr n, Key k)
-    {
+    nodeptr _remove(nodeptr n, Key k) {
         if(!n) return nodeptr(nullptr);
         if(k < n->key)
             n->left = _remove(n->left, k);
@@ -384,11 +322,11 @@ private:
             n->deleted = true;
 
             if(!tmpr) return tmpl;
-            nodeptr min = findmin(tmpr);
-            min->right = removemin(tmpr);
+            nodeptr min = _findmin(tmpr);
+            min->right = _removemin(tmpr);
             min->left = tmpl;
-            return balance(min);
+            return _balance(min);
         }
-        return balance(n);
+        return _balance(n);
     }
 };

@@ -28,6 +28,8 @@ TEST_CASE("basic avl tests") {
 
 
     REQUIRE(tree.begin() == tree.end());
+    copy['0'] = "hgy";
+    REQUIRE(copy['0'] == "hgy");
 }
 
 TEST_CASE("Consistency")
