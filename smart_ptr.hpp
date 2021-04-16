@@ -1,5 +1,6 @@
 #include <memory>
 #include <utility>
+#include <atomic>
 
 namespace smart_pointer {
     class exception : std::exception {
@@ -168,7 +169,7 @@ namespace smart_pointer {
 
             T* ptr;
             //Allocator alloc;
-            size_t count = 0;
+            std::atomic<size_t> count = 0;
         };
         Core* core;
     };

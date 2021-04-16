@@ -2,8 +2,12 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 #include <string>
+#include <thread>
+#include <vector>
 
 using std::string;
+using std::thread;
+using std::vector;
 
 TEST_CASE("basic avl tests") {
     avl_tree<char, string> tree;
@@ -65,7 +69,7 @@ TEST_CASE("Consistency_correct_end")
         tree.insert(key, value);
     }
 
-    auto its = std::vector<avl_tree<int, int>::iterator>();
+    auto its = vector<avl_tree<int, int>::iterator>();
     for (int i = 0; i < n; ++i)
     {
         auto it = tree.begin();
@@ -91,4 +95,32 @@ TEST_CASE("Consistency_correct_end")
             ++it;
         }
     }
+}
+
+
+
+
+TEST_CASE("Coarse-grained") {
+    int n = 9;
+
+    avl_tree<char, char> tree;
+    vector<thread> threads(n-1);
+    string s = "123456789";
+    size_t block_size = s.size() / n;
+    string::iterator block_start = s.begin();
+    auto f =  [&tree](std::string::iterator first, std::string::iterator last) {
+        std::for_each(first, last, [&tree](char& c) { tree.insert(c, c); });
+    };
+
+    for (size_t i = 0; i < n - 1; i++) {
+        string::iterator block_end = block_start;
+        std::advance(block_end, block_size);
+        threads[i] = thread(f, block_start, block_end);
+        block_start = block_end;
+    }
+
+    f(block_start, s.end());
+    for (auto& t : threads)
+        t.join();
+    REQUIRE(tree.begin().val() == '1');
 }

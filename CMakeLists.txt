@@ -3,4 +3,6 @@ project(consistent_list)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(consistent_list ../../CLionProjects/consistent_list/main.cpp ../../CLionProjects/consistent_list/consistent_tree.hpp ../../CLionProjects/consistent_list/smart_ptr.hpp)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=thread")
+
+add_executable(consistent_list main.cpp consistent_tree.hpp smart_ptr.hpp)

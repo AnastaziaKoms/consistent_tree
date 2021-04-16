@@ -2,6 +2,7 @@
 #include <cstddef>
 #include "smart_ptr.hpp"
 #include <iostream>
+#include <shared_mutex>
 
 /**
  * \param Key The key type. The type (class) must provide a 'less than' and 'equal to' operator
@@ -12,6 +13,9 @@
  */
 
 using smart_pointer::SmartPointer;
+using std::shared_mutex;
+using std::shared_lock;
+using std::unique_lock;
 
 template<typename Key, typename T>
 class avl_tree
@@ -32,6 +36,7 @@ class avl_tree
     using nodeptr = SmartPointer<node>;
     nodeptr _tree;
     size_t _size;
+    shared_mutex _mutex;
 
     // iterator class
     typedef class tag_avl_tree_iterator
@@ -194,6 +199,7 @@ public:
     }
     
     iterator insert(const key_type& key, const value_type& val) {
+        unique_lock lock(_mutex);
         _tree->left = _insert(_tree->left, key, val);
         _size++;
         return iterator(_find(_tree->left,key), _tree);
