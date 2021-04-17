@@ -35,8 +35,8 @@ class avl_tree
     
     using nodeptr = SmartPointer<node>;
     nodeptr _tree;
-    size_t _size;
-    shared_mutex _mutex;
+    size_t _size = 0;
+    mutable shared_mutex _mutex;
 
     // iterator class
     typedef class tag_avl_tree_iterator
@@ -65,7 +65,7 @@ class avl_tree
 
         // dereference - access value
         T& operator*() const {
-            return val();
+            return _pNode->value;
         }
 
         // access value
@@ -160,7 +160,7 @@ public:
         auto it = tree.begin();
         auto end = tree.end();
         while (it != end) {
-            insert(it.key(), it.val());
+            insert(it.key(), *it);
             it++;
         }
     }
@@ -176,26 +176,29 @@ public:
     }
 
     size_type size() const {
+        shared_lock lock(_mutex);
         return _size;
     }
 
     bool empty() const {
+        shared_lock lock(_mutex);
         return _size == static_cast<size_type>(0);
     }
     
     void clear() {
+        unique_lock lock(_mutex);
         _size = 0U;
         _tree->left = NULL;
     }
 
     T& operator[](const key_type& k) {
         auto res = find(k);
-        return res.val();
+        return *res;
     }
 
     T& operator[](key_type&& k) {
         auto res = find(std::move(k));
-        return res.val();
+        return *res;
     }
     
     iterator insert(const key_type& key, const value_type& val) {
@@ -206,18 +209,21 @@ public:
     }
     
     iterator find(const key_type& key) {
+        shared_lock lock(_mutex);
         if(!_tree->left) return end();
         return iterator(_find(_tree->left,key), _tree);
     }
     
     bool erase(const key_type& key) {
+        unique_lock lock(_mutex);
         _tree->left = _remove(_tree->left, key);
         _size--;
         return true;
     }
     
     bool erase(iterator position) {
-        _tree->left = _remove(_tree->left, position.key());
+        unique_lock lock(_mutex);
+        _tree->left = _remove(_tree->left, position._pNode->key);
         _size--;
         return true;
     }
