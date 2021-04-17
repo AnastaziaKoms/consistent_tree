@@ -192,17 +192,21 @@ public:
     }
 
     T& operator[](const key_type& k) {
-        auto res = find(k);
+        auto res = insert(k, T());
         return *res;
     }
 
     T& operator[](key_type&& k) {
-        auto res = find(std::move(k));
+        auto res = insert(std::move(k), T());
         return *res;
     }
     
     iterator insert(const key_type& key, const value_type& val) {
         unique_lock lock(_mutex);
+        if(_tree->left) {
+            auto res = iterator(_find(_tree->left, key), _tree);
+            if(res != end()) return res;
+        }
         _tree->left = _insert(_tree->left, key, val);
         _size++;
         return iterator(_find(_tree->left,key), _tree);

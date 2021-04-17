@@ -109,7 +109,7 @@ TEST_CASE("Coarse-grained") {
     size_t block_size = s.size() / n;
     string::iterator block_start = s.begin();
     auto f =  [&tree](std::string::iterator first, std::string::iterator last) {
-        std::for_each(first, last, [&tree](char& c) { tree.insert(c, c); });
+        std::for_each(first, last, [&tree](char& c) { tree[c] = c; });
     };
 
     for (size_t i = 0; i < n - 1; i++) {
