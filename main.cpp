@@ -60,7 +60,7 @@ TEST_CASE("Consistency")
 
 TEST_CASE("Consistency_correct_end")
 {
-    int n = 5000;
+    int n = 500;
     auto tree = avl_tree<int, int>();
     for (int i = 0; i < n; ++i)
     {
