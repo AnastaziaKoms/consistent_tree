@@ -42,12 +42,12 @@ class avl_tree
     typedef class tag_avl_tree_iterator
     {
         nodeptr _pNode;
-        nodeptr _root;
+        avl_tree& _tree;
 
     public:
         // ctor
-        explicit tag_avl_tree_iterator(nodeptr instance = nullptr, nodeptr tree = nullptr)
-                : _pNode(instance), _root(tree)
+        explicit tag_avl_tree_iterator(avl_tree& tree, nodeptr instance = nullptr)
+                : _pNode(instance), _tree(tree)
         { }
 
         tag_avl_tree_iterator& operator=(const tag_avl_tree_iterator& other) {
@@ -65,21 +65,25 @@ class avl_tree
 
         // dereference - access value
         T& operator*() const {
+            shared_lock lock(_tree._mutex);
             return _pNode->value;
         }
 
         // access value
         T& val() const {
+            shared_lock lock(_tree._mutex);
             return _pNode->value;
         }
 
         // access key
         Key& key() const {
+            shared_lock lock(_tree._mutex);
             return _pNode->key;
         }
 
         // preincrement
         tag_avl_tree_iterator& operator++() {
+            unique_lock lock(_tree._mutex);
             if(!_pNode) return *this;
             if (!_pNode->deleted && _pNode->right) {
                 _pNode = _pNode->right;
@@ -87,7 +91,7 @@ class avl_tree
                     _pNode = _pNode->left;
                 return *this;
             } else {
-                nodeptr q = _root->left; // get start node
+                nodeptr q = _tree._tree->left; // get start node
                 nodeptr suc;
 
                 while (q) {
@@ -111,6 +115,7 @@ class avl_tree
         }
 
         tag_avl_tree_iterator operator--() {
+            unique_lock lock(_tree._mutex);
             if(!_pNode) return *this;
             if (!_pNode->deleted && _pNode->left) {
                 _pNode = _pNode->left;
@@ -119,7 +124,7 @@ class avl_tree
                 return *this;
             }
             else {
-                nodeptr q = _root->left; // get start node
+                nodeptr q = _tree._tree->left; // get start node
                 nodeptr suc;
 
                 while (q) {
@@ -167,12 +172,12 @@ public:
     // iterators
     iterator begin()
     {
-        return iterator(_findmin(_tree->left), _tree);
+        return iterator(*this, _findmin(_tree->left));
     }
 
     iterator end()
     {
-        return iterator(nodeptr(nullptr), _tree->left);
+        return iterator(*this, nodeptr(nullptr));
     }
 
     size_type size() const {
@@ -204,18 +209,18 @@ public:
     iterator insert(const key_type& key, const value_type& val) {
         unique_lock lock(_mutex);
         if(_tree->left) {
-            auto res = iterator(_find(_tree->left, key), _tree);
+            auto res = iterator(*this, _find(_tree->left, key));
             if(res != end()) return res;
         }
         _tree->left = _insert(_tree->left, key, val);
         _size++;
-        return iterator(_find(_tree->left,key), _tree);
+        return iterator(*this, _find(_tree->left,key));
     }
     
     iterator find(const key_type& key) {
         shared_lock lock(_mutex);
         if(!_tree->left) return end();
-        return iterator(_find(_tree->left,key), _tree);
+        return iterator(*this, _find(_tree->left,key));
     }
     
     bool erase(const key_type& key) {

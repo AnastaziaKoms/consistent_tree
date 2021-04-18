@@ -100,7 +100,7 @@ TEST_CASE("Consistency_correct_end")
 
 
 
-TEST_CASE("Coarse-grained") {
+TEST_CASE("Coarse-grained common") {
     int n = 9;
 
     avl_tree<char, char> tree;
@@ -123,4 +123,8 @@ TEST_CASE("Coarse-grained") {
     for (auto& t : threads)
         t.join();
     REQUIRE(tree.begin().val() == '1');
+}
+
+TEST_CASE("Coarse-grained in(de)crement") {
+
 }
