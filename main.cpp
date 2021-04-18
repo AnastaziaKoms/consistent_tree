@@ -102,10 +102,10 @@ TEST_CASE("Consistency_correct_end")
 
 TEST_CASE("Coarse-grained common") {
     int n = 9;
-
+    string s = "123456789";
     avl_tree<char, char> tree;
     vector<thread> threads(n-1);
-    string s = "123456789";
+
     size_t block_size = s.size() / n;
     string::iterator block_start = s.begin();
     auto f =  [&tree](std::string::iterator first, std::string::iterator last) {
@@ -126,5 +126,25 @@ TEST_CASE("Coarse-grained common") {
 }
 
 TEST_CASE("Coarse-grained in(de)crement") {
+    int n = 8;
+    avl_tree<int, int> tree;
+    vector<thread> threads(n-1);
 
+    for (int i = 0; i < n; ++i) tree[i] = i;
+    auto it = tree.begin();
+
+    auto fp =  [&it]() {
+        ++it;
+    };
+    auto fm =  [&it]() {
+        --it;
+    };
+
+    for (size_t i = 0; i < n - 1; i++) {
+        threads[i] = i % 2 == 0 ?  thread(fp) : thread(fm);
+    }
+
+    for (auto& t : threads)
+        t.join();
+    REQUIRE(it == ++tree.begin());
 }
