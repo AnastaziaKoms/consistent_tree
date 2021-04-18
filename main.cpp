@@ -134,7 +134,7 @@ TEST_CASE("Coarse-grained in(de)crement") {
     auto it = tree.begin();
 
     auto fp =  [&it]() {
-        ++it;
+        it++;
     };
     auto fm =  [&it]() {
         --it;

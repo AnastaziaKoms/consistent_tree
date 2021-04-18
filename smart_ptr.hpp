@@ -1,6 +1,8 @@
 #include <memory>
 #include <utility>
 #include <atomic>
+#include <mutex>
+#include <shared_mutex>
 
 namespace smart_pointer {
     class exception : std::exception {
@@ -25,7 +27,9 @@ namespace smart_pointer {
         }
 
         // copy constructor
-        SmartPointer(const SmartPointer& src) : core(src.core) {
+        SmartPointer(const SmartPointer& src){
+            std::shared_lock lock(src._m);
+            core = src.core;
             if (core != nullptr && core->ptr != nullptr)
                 core->count++;
         }
@@ -37,6 +41,7 @@ namespace smart_pointer {
 
         // copy assigment
         SmartPointer& operator=(const SmartPointer& rhs) {
+            std::unique_lock lock(_m);
             tmp();
             if (rhs.core != nullptr)
                 rhs.core->count++;
@@ -73,6 +78,7 @@ namespace smart_pointer {
 
         //
         SmartPointer& operator=(value_type* rhs) {
+            std::unique_lock lock(_m);
             tmp();
 
             if (rhs != nullptr)
@@ -83,6 +89,7 @@ namespace smart_pointer {
         }
 
         ~SmartPointer() {
+            //std::unique_lock lock(_m); need??
             if (core != nullptr) {
                 core->count--;
                 if (core->count == 0) {
@@ -100,6 +107,7 @@ namespace smart_pointer {
         // return reference to the object of class/type T
         // if SmartPointer contains nullptr throw `SmartPointer::exception`
         value_type& operator*() {
+            std::shared_lock lock(_m);
             if (core == nullptr || core->ptr == nullptr) {
                 throw smart_pointer::exception();
             }
@@ -107,6 +115,7 @@ namespace smart_pointer {
             return *(core->ptr);
         }
         const value_type& operator*() const {
+            std::shared_lock lock(_m);
             if (core == nullptr || core->ptr == nullptr) {
                 throw smart_pointer::exception();
             }
@@ -116,12 +125,14 @@ namespace smart_pointer {
 
         // return pointer to the object of class/type T
         value_type* operator->() const {
+            std::shared_lock lock(_m);
             if (core == nullptr)
                 return nullptr;
             return core->ptr;
         }
 
         value_type* get() const {
+            //std::shared_lock lock(_m);
             if (!core)
                 return nullptr;
             return core->ptr;
@@ -129,12 +140,14 @@ namespace smart_pointer {
 
         // if pointer == nullptr => return false
         operator bool() const {
+            std::shared_lock lock(_m);
             return !(core == nullptr || core->ptr == nullptr);
         }
 
         // if pointers points to the same address or both null => true
         template<typename U>
         bool operator==(const SmartPointer<U>& rhs) const {
+            std::scoped_lock lock(_m, rhs._m);
             if (!core && !rhs.get())
                 return true;
             if (((core == nullptr) && (rhs.get() != nullptr)) ||
@@ -172,5 +185,6 @@ namespace smart_pointer {
             std::atomic<size_t> count = 0;
         };
         Core* core;
+        mutable std::shared_mutex _m;
     };
 }  // namespace smart_pointer
